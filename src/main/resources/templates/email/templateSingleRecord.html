@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <title>珠海房频订阅消息更新</title>
+</head>
+
+<body style="margin: 0;padding: 0;">
+<table align="center" border="1" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+        <td>
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"
+                   style="border-collapse: collapse;">
+                <tr>
+                    <td align="center" style="padding: 40px 0 30px 0;">
+                        <!--![](image/logo.png)-->
+                        <img src='cid:logoImage' alt='珠海房频订阅消息更新' title='珠海房频订阅消息更新' style='width:183px height:47.50px'>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td bgcolor="#ffffff" style="padding: 0px 30px 20px 30px">
+                        <h4 th:inline="text">你好，今天是<span th:text="${#dates.format(#calendars.createToday().getTime(),'yyyy-MM-dd')}"></span>,以下是珠海房频订阅消息播报:</h4>
+
+
+                        <table border="1" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td width="20%"><b>更新日期</b></td>
+                                <td style="padding: 0 0 3px 0"><span th:text="${emailParam.emailData.item.date}">2020-04-04</span></td>
+                            </tr>
+                            <tr>
+                                <td><b>更新内容</b></td>
+                                <td style="padding: 0 0 3px 0"><a th:href="${emailParam.emailData.item.url}"><span th:text="${emailParam.emailData.item.title}">珠海楼市暴涨100%</span></a></td>
+                            </tr>
+
+
+                            <!-- <tr>
+                                 <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                     <tr>
+                                         <td style="padding: 20px 0px 10px 0px">
+                                             Team Member:
+                                         </td>
+                                     </tr>
+                                     <tr th:each="member :${members}">
+                                         <td style="padding: 5px 0px 5px 0px"><span
+                                                 th:text="${member()}+', Email: '+${member()}"></span>
+                                         </td>
+                                     </tr>
+                                 </table>
+                             </tr>-->
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <table cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+                <td  align="center" style="padding: 5px 0px 5px 0px">
+                    <a class="button" href="http://www.baidu.com"  >查看历史播报</a>
+                </td>
+            </tr>
+        </table>
+    </tr>
+</table>
+
+
+</body>
+</html>
