@@ -3,10 +3,7 @@ package com.news.readerservice.contorller;
 import com.news.readerservice.model.EmailParam;
 import com.news.readerservice.model.NewsEntity;
 import com.news.readerservice.model.WebSiteEntity;
-import com.news.readerservice.service.EmailService;
-import com.news.readerservice.service.NewsEntityService;
-import com.news.readerservice.service.TaskExcutorService;
-import com.news.readerservice.service.ZhuHaiCrawlService;
+import com.news.readerservice.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +38,10 @@ public class ItemController {
 
 
 
-    @PostMapping(value="/email")
-    public void testEmail(){
-        this.emailTask2();
-    }
+//    @PostMapping(value="/email")
+//    public void testEmail(){
+//        this.emailTask2();
+//    }
 
 //    @Scheduled(cron="0 0/1 * * * ?")
     public void emailTask(){
@@ -69,8 +66,10 @@ public class ItemController {
         }
     }
 
-    @Scheduled(cron="0 0/1 * * * ?")
-    public void emailTask2(){
-        taskExcutorService.runTask();
-    }
+//    @Scheduled(cron="0 0/1 * * * ?")
+//    public void emailTask2(){
+//        taskExcutorService.runTask();
+//    }
+
+
 }
