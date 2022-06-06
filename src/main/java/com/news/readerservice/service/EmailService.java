@@ -1,6 +1,7 @@
 package com.news.readerservice.service;
 
 import com.news.readerservice.model.EmailParam;
+import com.news.readerservice.model.NewsEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,13 @@ import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 @Service
 public class EmailService {
+
+    private static BlockingDeque<NewsEntity> emailLinkedBlockQueue = new LinkedBlockingDeque();
 
     private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
 
@@ -33,6 +38,13 @@ public class EmailService {
     @Value("${templatePath}")
     private String templatePath;
 
+
+
+
+
+    public BlockingDeque<NewsEntity> getQueue(){
+        return emailLinkedBlockQueue;
+    }
 
     public void thymeleafEmail(String subject, EmailParam emailParam) throws MessagingException {
         this.thymeleafEmail(this.from,this.toList,subject,this.templatePath,emailParam);

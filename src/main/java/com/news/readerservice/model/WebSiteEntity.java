@@ -1,5 +1,6 @@
 package com.news.readerservice.model;
 
+import com.news.readerservice.inter.NewEntityJsoupMapper;
 import com.news.readerservice.inter.NewEntityMapper;
 
 import java.util.List;
@@ -9,11 +10,12 @@ public class WebSiteEntity {
     private String id;
     private String websiteName;
     private String websiteUrl;
-    private String pageDivCssSelect;
+    private String pageLinksCssSelect;
     private String newsTableCssSelect;
     private String newsTagRegex;
 
     private NewEntityMapper mapper;
+    private NewEntityJsoupMapper docMapper;
 
     private List<NewsEntity> newsEntityList;
 
@@ -55,12 +57,12 @@ public class WebSiteEntity {
         this.id = id;
     }
 
-    public String getPageDivCssSelect() {
-        return pageDivCssSelect;
+    public String getPageLinksCssSelect() {
+        return pageLinksCssSelect;
     }
 
-    public void setPageDivCssSelect(String pageDivCssSelect) {
-        this.pageDivCssSelect = pageDivCssSelect;
+    public void setPageLinksCssSelect(String pageLinksCssSelect) {
+        this.pageLinksCssSelect = pageLinksCssSelect;
     }
 
     public String getNewsTableCssSelect() {
@@ -85,5 +87,29 @@ public class WebSiteEntity {
 
     public void setNewsTagRegex(String newsTagRegex) {
         this.newsTagRegex = newsTagRegex;
+    }
+
+
+    public NewEntityJsoupMapper getDocMapper() {
+        return docMapper;
+    }
+
+    public void setDocMapper(NewEntityJsoupMapper docMapper) {
+        this.docMapper = docMapper;
+    }
+
+    @Override
+    public String toString() {
+        return "WebSiteEntity{" +
+                "id='" + id + '\'' +
+                ", websiteName='" + websiteName + '\'' +
+                ", websiteUrl='" + websiteUrl + '\'' +
+                ", pageLinksCssSelect='" + pageLinksCssSelect + '\'' +
+                ", newsTableCssSelect='" + newsTableCssSelect + '\'' +
+                ", newsTagRegex='" + newsTagRegex + '\'' +
+                ", mapper=" + mapper +
+                ", docMapper=" + docMapper +
+                ", newsEntityList=" + newsEntityList +
+                '}';
     }
 }

@@ -17,7 +17,7 @@ import org.jsoup.select.Elements;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZhuHaiGovService<main> implements CrawlService {
+public class ZhuHaiGovService implements CrawlService {
 
     public Logger LOG = Logger.getLogger(GenericCrawlService.class);
     public WebSiteEntity webSiteEntity;
@@ -58,7 +58,7 @@ public class ZhuHaiGovService<main> implements CrawlService {
             }
         }
 
-        LOG.info("pageNum-->"+pageNum);
+//        LOG.info("pageNum-->"+pageNum);
 
 
         return pageNum;
@@ -133,11 +133,12 @@ public class ZhuHaiGovService<main> implements CrawlService {
             for(int i=0; i<maxPage; i++){
                 String url = baseUrl + "/api/all/153?page="+getRealPage(i+1)+"&sid=756016";
                 List<NewsEntity> articles = this.crawlNews(url, i+1, 5, webSiteEntity.getWebsiteName());
-                articlesAll.addAll(articles);
+
 
                 for(NewsEntity article: articles){
                     if(!newsEntityService.checkIfExist(article)){
                         newsEntityService.save(article);
+                        articlesAll.add(article);
                     }else{
                         stopCheck = true;
                     }

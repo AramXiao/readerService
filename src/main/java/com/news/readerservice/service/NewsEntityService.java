@@ -23,7 +23,14 @@ public class NewsEntityService {
     }
 
     public boolean checkIfExist(NewsEntity newsEntity){
-        Example<NewsEntity> example = Example.of(newsEntity);
+
+        NewsEntity exampleEntity = new NewsEntity();
+        exampleEntity.setTitle(newsEntity.getTitle());
+        exampleEntity.setUrl(newsEntity.getUrl());
+        exampleEntity.setWebSiteName(newsEntity.getWebSiteName());
+        exampleEntity.setWebSiteUrl(newsEntity.getWebSiteUrl());
+
+        Example<NewsEntity> example = Example.of(exampleEntity);
         Optional<NewsEntity> optional = newsEntityRepository.findOne(example);
 
         return optional.isPresent()?true:false;
@@ -34,7 +41,8 @@ public class NewsEntityService {
         newsEntity.setWebSiteName(name);
         Example<NewsEntity> example = Example.of(newsEntity);
         long Count = newsEntityRepository.count(example);
-        return Count<0?false:true;
+        LOG.info("Count-->"+Count);
+        return Count<=0?false:true;
     }
 
     public void save(NewsEntity newsEntity){

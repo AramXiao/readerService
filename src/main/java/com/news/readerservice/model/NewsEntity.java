@@ -17,6 +17,17 @@ public class NewsEntity implements Comparable<NewsEntity>{
     String url;
     String title;
     String date;
+    String detailInfo;
+
+    public String getDetailInfo() {
+        return detailInfo;
+    }
+
+    public void setDetailInfo(String detailInfo) {
+        this.detailInfo = detailInfo;
+    }
+
+
 
     public NewsEntity(){}
 
@@ -81,6 +92,8 @@ public class NewsEntity implements Comparable<NewsEntity>{
     public void setId(String id) {
         this.id = id;
     }
+
+
 
     @Override
     public int compareTo(NewsEntity o) {

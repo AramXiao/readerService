@@ -3,10 +3,11 @@ package com.news.readerservice.utils;
 import com.news.readerservice.inter.NewEntityMapper;
 import com.news.readerservice.model.NewsEntity;
 import com.news.readerservice.model.WebSiteEntity;
-import com.news.readerservice.service.GenericCrawlService;
 import org.apache.log4j.Logger;
+import org.jsoup.nodes.Document;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +38,17 @@ public class HtmlUtil {
         return base;
     }
 
+    public static String getBaseUrlContext(String url){
+        String base = getBaseUrl(url);
+        if(url==null){
+            return "";
+        }
+        if(url.indexOf("?")>-1){
+            return base + url.substring(url.lastIndexOf("/"), url.indexOf("?"));
+        }
+        return url.trim();
+    }
+
     public static int getPageNum(String url){
         int pageNum = 0;
         String regx_url = "(^[^_]*)_([0-9]*)\\.(html)$";
@@ -45,14 +57,70 @@ public class HtmlUtil {
         if(matcher.find()){
             pageNum = Integer.parseInt(matcher.group(2));
         }
-        System.out.println("pageNum-->"+pageNum);
+//        System.out.println("pageNum-->"+pageNum);
         return pageNum;
     }
 
+    public static int getMaxPageNum(List<String> linksList){
+        int maxPageNum = 0;
+        Pattern p = Pattern.compile("http://.*?_([0-9]*)\\.html", Pattern.CASE_INSENSITIVE);
+        Matcher m = null;
+        for(String url : linksList){
+            m = p.matcher(url);
+            LOG.info("url-->"+url);
+            if(m.find()){
+                Integer pageNum = Integer.parseInt(m.group(1));
+                if(maxPageNum<pageNum){
+                    maxPageNum = pageNum;
+                }
+            }
+
+        }
+//        LOG.info("maxPageNum-->"+maxPageNum);
+        return maxPageNum;
+    }
+
+    public static List<String> getFullPageList(List<String> source){
+        List<String> pageLinkList = new ArrayList<>();
+        int maxPageNum = getMaxPageNum(source);
+            for(String link : source){
+                String templateUrl = "";
+                if(link.split("_").length>1){
+                    templateUrl = link.split("_")[0] + "_" + "{pageSize}.html";
+                }else{
+                    templateUrl = link.substring(0,link.lastIndexOf(".")) + "_" + "{pageSize}.html";
+                }
+                for(int i=1; i<=maxPageNum; i++){
+                    String pageUrl = templateUrl.replace("{pageSize}", String.valueOf(i));
+//                    if(HttpClientUtil.healthCheckUrl(pageUrl)){
+                    if(!source.contains(pageUrl)){
+                            source.add(pageUrl);
+                    }
+                }
+
+                break;
+            }
+
+
+
+
+        LOG.info("source==>"+source);
+
+        return source;
+
+    }
+
+
     public static List<NewsEntity> crawlTableToNewsEnttiy(String tableContent, String pageUrl, WebSiteEntity webSiteEntity){
         Pattern p = Pattern.compile(webSiteEntity.getNewsTagRegex(), Pattern.CASE_INSENSITIVE);
+//        LOG.info("tableContent-->"+tableContent);
+//        LOG.info("webSiteEntity-->"+webSiteEntity);
         Matcher m = p.matcher(tableContent);
         return webSiteEntity.getMapper().mapToList(m, pageUrl,webSiteEntity);
+    }
+
+    public static List<NewsEntity> crawlDocToNewsEntity(Document doc, String pageUrl, WebSiteEntity webSiteEntity){
+        return webSiteEntity.getDocMapper().mapToList(doc,pageUrl,webSiteEntity);
     }
 
     public static void main(String[] args){

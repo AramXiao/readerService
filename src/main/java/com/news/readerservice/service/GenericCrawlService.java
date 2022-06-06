@@ -1,6 +1,5 @@
 package com.news.readerservice.service;
 
-import com.gargoylesoftware.htmlunit.html.Html;
 import com.news.readerservice.inter.CrawlService;
 import com.news.readerservice.model.NewsEntity;
 import com.news.readerservice.model.WebSiteEntity;
@@ -28,6 +27,7 @@ public class GenericCrawlService implements CrawlService {
         this.newsEntityService = newsEntityService;
     }
 
+
     public void setWebSiteEntity(WebSiteEntity webSiteEntity){
         this.webSiteEntity = webSiteEntity;
     }
@@ -40,15 +40,18 @@ public class GenericCrawlService implements CrawlService {
 
     public void crawlPageUrlLink(List<String> destArray, String url, String websiteName, String pageCssSelect){
 
+        LOG.info("start crawl page link for websiteName -->" + websiteName);
         Document doc = null;
+        HttpClient httpClient = HttpClientUtil.createDefaultClient();
         try {
-            doc = HttpClientUtil.getHtmlPageResponseAsDocument(url);
+            doc = HttpClientUtil.getHtmlPageResponseByHttp(websiteName, httpClient, url, Consts.UTF_8.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
         Elements els =  doc.select(pageCssSelect);
         if(els.isEmpty()){
-            LOG.info("NO elements find!");
+            LOG.info("NO link element find, add crawl url as page url");
+            destArray.add(url);
             return ;
         }
 
@@ -66,6 +69,33 @@ public class GenericCrawlService implements CrawlService {
 
         }
 
+        List<String> urlList = HtmlUtil.getFullPageList(destArray);
+        destArray = urlList;
+
+
+        Collections.sort(destArray, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                int pageNum1 = 0;
+                if(o1.indexOf("_")>-1){
+                    pageNum1 = HtmlUtil.getPageNum(o1);
+                }else{
+                    pageNum1 = 0;
+                }
+                int pageNum2 = 0;
+                if(o2.indexOf("_")>-1){
+                    pageNum2 = HtmlUtil.getPageNum(o2);
+                }else{
+                    pageNum2 = 0;
+                }
+                if(pageNum1==pageNum2){
+                    return 0;
+                }
+
+                return pageNum1>pageNum2?1:-1;
+            }
+        });
+
         LOG.info("destArray===>"+destArray);
 
     }
@@ -80,24 +110,39 @@ public class GenericCrawlService implements CrawlService {
         LOG.info("processing crawlNews");
         HttpClient httpClient = HttpClientUtil.createDefaultClient();
         List<NewsEntity> newsEntityList = new ArrayList<>();
-        LOG.info("Process for " + websiteName);
+
+        LOG.info("urlArray==>"+urlArray);
         for(String url : urlArray){
             String convertUrl = "";
-            if(url.indexOf("http")<0){
-                convertUrl = HtmlUtil.getBaseUrl(webSiteEntity.getWebsiteUrl()) + "/" + url;
-            }else{
-                convertUrl = url;
-            }
-            String webContent = HttpClientUtil.crawl(websiteName, httpClient, convertUrl, Consts.UTF_8.toString());
-            Document doc = Jsoup.parse(webContent);
-            Element el = doc.selectFirst(newsDivRegex);
+            try{
 
-            if(el!=null){
-                String tableData = el.html();
-                List<NewsEntity> resultList = HtmlUtil.crawlTableToNewsEnttiy(tableData, convertUrl, this.webSiteEntity);
+
+                if(url.indexOf("http")<0){
+                    convertUrl = HtmlUtil.getBaseUrl(webSiteEntity.getWebsiteUrl()) + "/" + url;
+                }else{
+                    convertUrl = url;
+                }
                 LOG.info("crawl url:" + convertUrl);
-                LOG.info("resultlist-->"+resultList);
-                newsEntityList.addAll(resultList);
+                String webContent = HttpClientUtil.crawl(websiteName, httpClient, convertUrl, Consts.UTF_8.toString());
+                Document doc = Jsoup.parse(webContent);
+
+
+                if(this.webSiteEntity.getMapper()!=null){
+                    Element el = doc.selectFirst(newsDivRegex);
+                    String tableData = el.html();
+                    List<NewsEntity> resultList = HtmlUtil.crawlTableToNewsEnttiy(tableData, convertUrl, this.webSiteEntity);
+
+                    LOG.info("resultlist-->"+resultList);
+                    newsEntityList.addAll(resultList);
+                }else if(this.webSiteEntity.getDocMapper()!=null){
+                    List<NewsEntity> resultList = HtmlUtil.crawlDocToNewsEntity(doc,convertUrl, this.webSiteEntity);
+                    LOG.info("crawl url:" + convertUrl);
+                    LOG.info("resultlist-->"+resultList);
+                    newsEntityList.addAll(resultList);
+                }
+
+            }catch(Exception e){
+                LOG.info("Exception hit when crawling for url : " + convertUrl, e);
             }
 
 
@@ -109,9 +154,11 @@ public class GenericCrawlService implements CrawlService {
     }
 
     public List<NewsEntity> initNewsToDB(){
-
+        LOG.info("processing initNewsToDB");
         List<String> urlArray = new ArrayList<>();
-        this.crawlPageUrlLink(urlArray, this.webSiteEntity.getWebsiteUrl(), this.webSiteEntity.getWebsiteName(), this.getWebSiteEntity().getPageDivCssSelect());
+        LOG.info("urlArray==>"+urlArray);
+        this.crawlPageUrlLink(urlArray, this.webSiteEntity.getWebsiteUrl(), this.webSiteEntity.getWebsiteName(), this.getWebSiteEntity().getPageLinksCssSelect());
+        LOG.info("after crawlPageUrlLink, urlArray==>"+urlArray);
         List<NewsEntity> newsList = this.crawlNews(urlArray, this.webSiteEntity.getWebsiteName(), this.webSiteEntity.getNewsTableCssSelect(), this.webSiteEntity.getNewsTagRegex());
 
         LOG.info("saveNews-->" + newsList);
@@ -132,26 +179,8 @@ public class GenericCrawlService implements CrawlService {
             this.initNewsToDB();
         }else{
 
-            this.crawlPageUrlLink(pageLinks, this.webSiteEntity.getWebsiteUrl(), this.webSiteEntity.getWebsiteName(), this.webSiteEntity.getPageDivCssSelect());
+            this.crawlPageUrlLink(pageLinks, this.webSiteEntity.getWebsiteUrl(), this.webSiteEntity.getWebsiteName(), this.webSiteEntity.getPageLinksCssSelect());
 
-            Collections.sort(pageLinks, new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    int pageNum1 = 0;
-                    if(o1.indexOf("_")>-1){
-                        pageNum1 = HtmlUtil.getPageNum(o1);
-                    }else{
-                        pageNum1 = 0;
-                    }
-                    int pageNum2 = 0;
-                    if(o2.indexOf("_")>-1){
-                        pageNum2 = HtmlUtil.getPageNum(o2);
-                    }else{
-                        pageNum2 = 0;
-                    }
-                    return pageNum1>pageNum2?1:-1;
-                }
-            });
 
             Iterator<String> iter = pageLinks.iterator();
 
@@ -170,6 +199,7 @@ public class GenericCrawlService implements CrawlService {
                         //News not exist in DB, add to insertDB list
                         insertDBList.add(news);
                     }else{
+                        LOG.info("find exist record in DB, stop to check, current pagelink-->" + pageLink);
                         stopCheck = true;
                     }
                 }

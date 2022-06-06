@@ -43,7 +43,7 @@ public class ItemController {
 //        this.emailTask2();
 //    }
 
-//    @Scheduled(cron="0 0/1 * * * ?")
+//    @Scheduled(cron="0 0/5 * * * ?")
     public void emailTask(){
         try {
             EmailParam emailParam = new EmailParam();
@@ -66,10 +66,21 @@ public class ItemController {
         }
     }
 
-//    @Scheduled(cron="0 0/1 * * * ?")
-//    public void emailTask2(){
-//        taskExcutorService.runTask();
-//    }
+    @Scheduled(cron="0 0/5 * * * ?")
+    public void scheduleEmailTask(){
+        taskExcutorService.runTask();
+    }
+
+
+    @Scheduled(cron="0 0 9 * * ?")
+    public void scheduleDailyAMTask(){
+        taskExcutorService.runDailyTask();
+    }
+
+    @Scheduled(cron="0 0 18 * * ?")
+    public void scheduleDailyPMTask(){
+        taskExcutorService.runDailyTask();
+    }
 
 
 }

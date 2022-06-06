@@ -106,10 +106,10 @@ public class HttpClientUtil {
 
                 if(entity!=null){
                     webPageContent = EntityUtils.toString(entity, encoding);
-                    LOG.info("[Website "+name+"] download url " + url + " success");
+                     LOG.info("[Website "+name+"] download url " + url + " success");
                     EntityUtils.consume(entity);
                     httpGet.abort();
-                    System.out.println("webPageContent-->"+webPageContent);
+//                    System.out.println("webPageContent-->"+webPageContent);
                     return webPageContent;
                 }
             }
@@ -198,6 +198,10 @@ public class HttpClientUtil {
         return parseHtmlToDoc(getHtmlPageResponse(url));
     }
 
+    public static Document getHtmlPageResponseByHttp(String name, HttpClient httpClient, String url, String encoding)throws Exception{
+        return parseHtmlToDoc(crawl(name, httpClient, url, encoding));
+    }
+
 
 
     /**
@@ -217,6 +221,26 @@ public class HttpClientUtil {
         return Jsoup.parse(result);
     }
 
+    public static boolean healthCheckUrl(String url){
+        LOG.info("health check url===>"+url);
+        HttpClient httpClient = createDefaultClient();
+        HttpGet get = new HttpGet(url);
+
+        try {
+            HttpResponse response = httpClient.execute(get);
+            if(response.getStatusLine().getStatusCode()==200){
+                LOG.info("request success for " + url + ", response code-->" + response.getStatusLine().getStatusCode());
+                return true;
+            }else{
+                LOG.info("request fail for " + url + ", response code-->"+response.getStatusLine().getStatusCode());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            get.abort();
+        }
+        return false;
+    }
 
 
 
